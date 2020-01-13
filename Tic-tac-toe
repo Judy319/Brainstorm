@@ -1,0 +1,246 @@
+;; 4(a)  
+;; Helper Function #1:  
+;; (X-firstlist T3Grid-oneline) consumes one line of T3Grid, which is a  
+;; list of symbol (either 'X 'O or '_), and produces the number of times  
+;; 'X appears in this list of symbol (a line from T3Grid) as in a natural number  
+;; X-firstlist: (listof (anyof 'X 'O '_)) -> Nat  
+;; Examples:  
+(check-expect (X-firstlist '(X _ X _ X O O O)) 3)  
+(check-expect (X-firstlist empty) 0)  
+(check-expect (X-firstlist '(O O O O _ _ _ _ O O O O)) 0)  
+(check-expect (X-firstlist '(X)) 1)  
+  
+(define (X-firstlist T3Grid-oneline)  
+  (cond [(empty? T3Grid-oneline) 0]  
+        [(member? 'X T3Grid-oneline)  
+         (cond [(symbol=? (first T3Grid-oneline) 'X)  
+                (+ 1 (X-firstlist (rest T3Grid-oneline)))]  
+               [else (X-firstlist (rest T3Grid-oneline))])]  
+        [else (X-firstlist (rest T3Grid-oneline))]))  
+  
+;; Tests:  
+(check-expect (X-firstlist '(_)) 0)  
+(check-expect (X-firstlist '(O)) 0)  
+(check-expect (X-firstlist '(_ _ O X O _ X X X X X X)) 7)  
+(check-expect (X-firstlist '(X X O)) 2)  
+  
+;; Helper Function #2:  
+;; (O-firstlist T3Grid-oneline) consumes one line of T3Grid, which is a  
+;; list of symbol (either 'X 'O or '_) and produces the number of times  
+;; 'O appears in this list of symbol (a line from T3Grid) as in a natural number  
+;; O-firstlist: (listof (anyof 'X 'O '_)) -> Nat  
+;; Examples:  
+(check-expect (O-firstlist '(X _ X _ X O O O)) 3)  
+(check-expect (O-firstlist empty) 0)  
+(check-expect (O-firstlist '(O O O O _ _ _ _ O O O O)) 8)  
+(check-expect (O-firstlist '(X)) 0)  
+  
+(define (O-firstlist T3Grid-oneline)  
+  (cond [(empty? T3Grid-oneline) 0]  
+        [(member? 'O T3Grid-oneline)  
+         (cond [(symbol=? (first T3Grid-oneline) 'O)  
+                (+ 1 (O-firstlist (rest T3Grid-oneline)))]  
+               [else (O-firstlist (rest T3Grid-oneline))])]  
+        [else (O-firstlist (rest T3Grid-oneline))]))  
+  
+;; Tests:  
+(check-expect (O-firstlist '(_)) 0)  
+(check-expect (O-firstlist '(O)) 1)  
+(check-expect (O-firstlist '(_ _ O X O _ X X X X X X)) 2)  
+(check-expect (O-firstlist '(X X O)) 1)  
+  
+;; Helper Function #3:  
+;; (X-number T3Grid) consumes a T3Grid and produces the number  
+;; of times 'X appears in the whole T3 Grid as in a natural number  
+;; X-number: T3Grid -> Nat  
+;; Examples:  
+(check-expect (X-number grid1) 0)  
+(check-expect (X-number grid2) 4)  
+(check-expect (X-number grid3) 1)  
+(check-expect (X-number '(() (X))) 1)  
+  
+(define (X-number T3Grid)  
+  (cond [(empty? T3Grid) 0]  
+        [(empty? (first T3Grid)) (X-number (rest T3Grid))]  
+        [else (+ (X-firstlist (first T3Grid))  
+                 (X-number (rest T3Grid)))]))  
+  
+;; Tests:  
+(check-expect (X-number grid4) 8)  
+(check-expect (X-number grid5) 2)  
+(check-expect (X-number empty) 0)  
+  
+;; Helper Function #4:  
+;; (O-number T3Grid) consumes a T3Grid and produces the number of times  
+;; 'O appears in the whole T3 Grid as in a natural number  
+;; O-number: T3Grid -> Nat  
+;; Examples:  
+(check-expect (O-number grid1) 0)  
+(check-expect (O-number grid2) 4)  
+(check-expect (O-number grid3) 0)  
+  
+(define (O-number T3Grid)  
+  (cond [(empty? T3Grid) 0]  
+        [(empty? (first T3Grid)) (O-number (rest T3Grid))]  
+        [else (+ (O-firstlist (first T3Grid))  
+                 (O-number (rest T3Grid)))]))  
+  
+;; Tests:  
+(check-expect (O-number grid4) 7)  
+(check-expect (O-number grid5) 1)  
+(check-expect (O-number empty) 0)  
+(check-expect (O-number '(() (O O))) 2)  
+  
+;; Main Function:  
+;; (whose-turn T3Grid) consumes a consumes a T3Grid and determines  
+;; whose turn it is through providing a symbol of either 'X or 'O.  
+;; X goes first, so if the number of Xs and Os is equal,  
+;; X goes next (produce 'X). If the number of Xs is 1 greater than the  
+;; number of Os, O goes next (produce 'O)  
+;; whose-turn: T3Grid -> (Anyof 'X 'O)  
+;; Examples:  
+(check-expect (whose-turn grid1) 'X)  
+(check-expect (whose-turn grid2) 'X)  
+(check-expect (whose-turn grid3) 'O)  
+(check-expect (whose-turn grid7) 'X)  
+  
+(define (whose-turn T3Grid)  
+  (cond [(= 1 (- (X-number T3Grid) (O-number T3Grid))) 'O]  
+        [(= (X-number T3Grid) (O-number T3Grid)) 'X]))  
+  
+;; Tests:  
+(check-expect (whose-turn grid4) 'O)  
+(check-expect (whose-turn grid5) 'O)  
+(check-expect (whose-turn grid6) 'X)  
+(check-expect (whose-turn grid8) 'O)  
+  
+;; 4(b)  
+;; (grid-ref T3Grid row-num column-num) consumes a T3Grid and a  
+;; row(row-num) and column number(column-num), and produces the symbol  
+;; located at that location (either 'X 'O or '_). Row and column numbers  
+;; start counting from 0  
+;; grid-ref: T3Grid Nat Nat -> (Anyof 'X 'O '_)  
+;; requires: 0 <= row-num < N  
+;;           0 <= column-num < N  
+;;           (N is the number of rows and columns in the grid)  
+;; notes: we may use the built-in function list-ref  
+;;       (when index is in the range, as requires mentioned)  
+;; Examples:  
+(check-expect (grid-ref grid2 1 2) 'O)  
+(check-expect (grid-ref grid2 0 0) 'X)  
+(check-expect (grid-ref grid1 2 1) '_)  
+(check-expect (grid-ref grid4 2 4) 'X)  
+  
+(define (grid-ref T3Grid row-num column-num)  
+  (list-ref (list-ref T3Grid row-num) column-num))  
+  
+;; Tests:  
+(check-expect (grid-ref grid5 2 1) '_)  
+(check-expect (grid-ref grid6 1 0) 'O)  
+(check-expect (grid-ref grid3 0 0) 'X)  
+(check-expect (grid-ref grid6 0 1) 'X)  
+  
+;; 4(c)  
+;; (get-column T3Grid column-num) consumes consumes a T3Grid,  
+;; and a column number(column-num), and produces a list of the symbols  
+;; (either 'X 'O or '_) in that column.  
+;; get-column: T3Grid Nat -> (listof (anyof 'X 'O '_))  
+;; requires: 0 <= column-num < N  
+;;           (N is the number of rows and columns in the grid)  
+;; notes: we may use the built-in function list-ref  
+;;       (when index is in the range, as requires mentioned)  
+;; Examples:  
+(check-expect (get-column grid4 5) '(_ _ _ X _ _ O))  
+(check-expect (get-column grid1 0) '(_ _ _))  
+(check-expect (get-column grid2 1) '(O X _ _ _))  
+(check-expect (get-column grid3 0) '(X))  
+  
+(define (get-column T3Grid column-num)  
+  (cond [(empty? T3Grid) empty]  
+        [else (cons (list-ref (first T3Grid) column-num)  
+        (get-column (rest T3Grid) column-num))]))  
+  
+;; Tests:  
+(check-expect (get-column grid6 2) '(_ _ _))  
+(check-expect (get-column empty 5) empty)  
+(check-expect (get-column grid4 1) '(O O _ _ _ X _))  
+(check-expect (get-column grid5 1) '(O _ _))  
+  
+  
+;; 4(d)  
+;; Helper Function:  
+;; (player-symbol-onelist T3Grid-oneline player-symbol) consumes one  
+;; line of T3Grid, which is a list of symbol (either 'X 'O or '_),  
+;; and a symbol of either 'X or 'O (player-symbol), and produces the number  
+;; of times the given specific symbol (either 'X or 'O) appears  
+;; in this list of symbol (a line from T3Grid) as in a natural number  
+;; player-symbol-onelist: (listof (anyof 'X 'O '_)) (Anyof 'X 'O) -> Nat  
+;; Examples:  
+(check-expect (player-symbol-onelist '(X _ X _ X O O O) 'X) 3)  
+(check-expect (player-symbol-onelist empty 'X) 0)  
+(check-expect (player-symbol-onelist '(O O O O _ _ _ _ O O O O) 'X) 0)  
+(check-expect (player-symbol-onelist '(X) 'X) 1)  
+(check-expect (player-symbol-onelist '(X _ X _ X O O O) 'O) 3)  
+(check-expect (player-symbol-onelist empty 'O) 0)  
+(check-expect (player-symbol-onelist '(O O O O _ _ _ _ O O O O) 'O) 8)  
+(check-expect (player-symbol-onelist '(X) 'O) 0)  
+  
+(define (player-symbol-onelist T3Grid-oneline player-symbol)  
+  (cond [(empty? T3Grid-oneline) 0]  
+        [(member? player-symbol T3Grid-oneline)  
+         (cond [(symbol=? (first T3Grid-oneline) player-symbol)  
+                (+ 1 (player-symbol-onelist  
+                      (rest T3Grid-oneline) player-symbol))]  
+               [else (player-symbol-onelist  
+                      (rest T3Grid-oneline) player-symbol)])]  
+        [else (player-symbol-onelist (rest T3Grid-oneline) player-symbol)]))  
+  
+;; Tests:  
+(check-expect (player-symbol-onelist '(_) 'X) 0)  
+(check-expect (player-symbol-onelist '(O) 'X) 0)  
+(check-expect (player-symbol-onelist '(_ _ O X O _ X X X X X X) 'X) 7)  
+(check-expect (player-symbol-onelist '(X X O) 'X) 2)  
+(check-expect (player-symbol-onelist '(_) 'O) 0)  
+(check-expect (player-symbol-onelist '(O) 'O) 1)  
+(check-expect (player-symbol-onelist '(_ _ O X O _ X X X X X X) 'O) 2)  
+(check-expect (player-symbol-onelist '(X X O) 'O) 1)  
+  
+;; Main Function:  
+;; (will-win? T3Grid row-num column-num player-symbol) consumes a T3Grid,  
+;; a row number, a column number, and a player (either 'X or 'O).  
+;; The function produces true if that player would win by placing a marker  
+;; at the given location, and false otherwise. Note that if the given  
+;; location is not blank, then the player will not win (you cannot win by  
+;; making an illegal move)  
+;; will-win?: T3Grid Nat Nat (Anyof 'X 'O) -> Bool  
+;; requires: 0 <= row-num < N  
+;;           0 <= column-num < N  
+;;           (N is the number of rows and columns in the grid)  
+;; notes: we may use the built-in function list-ref  
+;;       (when index is in the range, as requires mentioned)  
+;; Examples:  
+(check-expect (will-win? grid1 0 0 'X) false)  
+(check-expect (will-win? grid4 2 2 'O) false)  
+(check-expect (will-win? grid7 2 2 'O) true)  
+(check-expect (will-win? grid3 0 0 'X) false)  
+(check-expect (will-win? grid2 2 1 'X) false)  
+(check-expect (will-win? grid8 4 4 'O) true)  
+  
+(define (will-win? T3Grid row-num column-num player-symbol)  
+  (cond [(not (symbol=? (grid-ref T3Grid row-num column-num) '_)) false]  
+        [(= (player-symbol-onelist (get-column T3Grid column-num) player-symbol)  
+             (- (length (get-column T3Grid column-num)) 1)) true]  
+        [(= (player-symbol-onelist (list-ref T3Grid row-num) player-symbol)  
+                (- (length (list-ref T3Grid row-num)) 1)) true]  
+        [else false]))  
+  
+;; Tests:  
+(check-expect (will-win? grid4 2 2 'X) false)  
+(check-expect (will-win? grid7 2 1 'X) true)  
+(check-expect (will-win? grid3 0 0 'O) false)  
+(check-expect (will-win? grid2 2 2 'O) false)  
+(check-expect (will-win? '((X X _)  
+                           (O X O)  
+                           (O _ _))  
+                         0 2 'X) true)  
+(check-expect (will-win? grid8 4 4 'X) false)  
