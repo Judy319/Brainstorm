@@ -1,4 +1,4 @@
-;; 4(a)  
+;; -------------------- Scheme Racket for Tic-Tac-Toe
 ;; Helper Function #1:  
 ;; (X-firstlist T3Grid-oneline) consumes one line of T3Grid, which is a  
 ;; list of symbol (either 'X 'O or '_), and produces the number of times  
@@ -114,7 +114,7 @@
 (check-expect (whose-turn grid6) 'X)  
 (check-expect (whose-turn grid8) 'O)  
   
-;; 4(b)  
+;; -----------------------------------------------------------------------------------------------
 ;; (grid-ref T3Grid row-num column-num) consumes a T3Grid and a  
 ;; row(row-num) and column number(column-num), and produces the symbol  
 ;; located at that location (either 'X 'O or '_). Row and column numbers  
@@ -140,7 +140,7 @@
 (check-expect (grid-ref grid3 0 0) 'X)  
 (check-expect (grid-ref grid6 0 1) 'X)  
   
-;; 4(c)  
+;; ---------------------------------------------------------------------------------------
 ;; (get-column T3Grid column-num) consumes consumes a T3Grid,  
 ;; and a column number(column-num), and produces a list of the symbols  
 ;; (either 'X 'O or '_) in that column.  
@@ -167,7 +167,7 @@
 (check-expect (get-column grid5 1) '(O _ _))  
   
   
-;; 4(d)  
+;; ----------------------------------------------------------------------------------------  
 ;; Helper Function:  
 ;; (player-symbol-onelist T3Grid-oneline player-symbol) consumes one  
 ;; line of T3Grid, which is a list of symbol (either 'X 'O or '_),  
